@@ -14,6 +14,7 @@ import org.apache.spark.sql.types.StructField
 import org.apache.spark.sql.types.StructType
 
 import com.fasterxml.jackson.core.JsonFactory
+import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * 将StructType类型的字段转换为Json String
@@ -26,20 +27,14 @@ case class Json(child: Expression) extends UnaryExpression with ImplicitCastInpu
 
   val inputStructType: StructType = child.dataType match {
     case st: StructType => st
-    case _ => StructType(Seq(
-      child match {
-        case ne: NamedExpression =>
-          StructField(ne.name, ne.dataType, ne.nullable, ne.metadata)
-        case _ =>
-          StructField("col", child.dataType, child.nullable, Metadata.empty)
-      }))
+    case _ => StructType(Seq(StructField("col", child.dataType, child.nullable, Metadata.empty)))
   }
 
   override def checkInputDataTypes(): TypeCheckResult = TypeCheckResult.TypeCheckSuccess
 
   // 参照 org.apache.spark.sql.DataFrame.toJSON
   // 参照 org.apache.spark.sql.execution.datasources.json.JsonOutputWriter.writeInternal
-  protected override def nullSafeEval(data: Any): Any = {
+  protected override def nullSafeEval(data: Any): UTF8String = {
     val writer = new CharArrayWriter
     val gen = new JsonFactory().createGenerator(writer).setRootValueSeparator(null)
     val internalRow = child.dataType match {
@@ -49,37 +44,61 @@ case class Json(child: Expression) extends UnaryExpression with ImplicitCastInpu
     JacksonGenerator(inputStructType, gen)(internalRow)
     gen.flush
     gen.close
-    writer.toString
+    val json = writer.toString
+    UTF8String.fromString(
+      child.dataType match {
+        case _: StructType => json
+        case _ => json.substring(json.indexOf(":") + 1, json.lastIndexOf("}"))
+      })
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
     val writer = ctx.freshName("writer")
     val gen = ctx.freshName("gen")
     val st = ctx.freshName("st")
+    val json = ctx.freshName("json")
     val typeJson = inputStructType.json
     def getDataExp(data: Any) =
       child.dataType match {
         case _: StructType => s"$data"
         case _ => s"new org.apache.spark.sql.catalyst.expressions.GenericInternalRow(new Object[]{$data})"
       }
+    def formatJson(json: String) =
+      child.dataType match {
+        case _: StructType => s"$json"
+        case _ => s"""$json.substring($json.indexOf(":") + 1, $json.lastIndexOf("}"))"""
+      }
     nullSafeCodeGen(ctx, ev, (row) => {
       s"""
-        | if ($row == null) {
+        | com.fasterxml.jackson.core.JsonGenerator $gen = null;
+        | try {
+        |   org.apache.spark.sql.types.StructType $st = ${classOf[Json].getName}.getStructType("${typeJson.replace("\"", "\\\"")}");
+        |   java.io.CharArrayWriter $writer = new java.io.CharArrayWriter();
+        |   $gen = new com.fasterxml.jackson.core.JsonFactory().createGenerator($writer).setRootValueSeparator(null);
+        |   org.apache.spark.sql.execution.datasources.json.JacksonGenerator.apply($st, $gen, ${getDataExp(row)});
+        |   $gen.flush();
+        |   String $json = $writer.toString();
+        |   ${ev.value} = UTF8String.fromString(${formatJson(json)});
+        | } catch (Exception e) {
         |   ${ev.isNull} = true;
-        | } else {
-        |   try {
-        |     org.apache.spark.sql.types.StructType $st = (org.apache.spark.sql.types.StructType)
-        |         org.apache.spark.sql.types.DataType.fromJson("${typeJson.replace("\"", "\\\"")}");
-        |     java.io.CharArrayWriter $writer = new java.io.CharArrayWriter();
-        |     com.fasterxml.jackson.core.JsonGenerator $gen = new com.fasterxml.jackson.core.JsonFactory().createGenerator($writer).setRootValueSeparator(null);
-        |     org.apache.spark.sql.execution.datasources.json.JacksonGenerator.apply($st, $gen, ${getDataExp(row)});
-        |     $gen.flush();
-        |     $gen.close();
-        |     ${ev.value} = UTF8String.fromString($writer.toString());
-        |   } catch (Exception e) {
-        |   }
+        | } finally {
+        |   if ($gen != null) $gen.close();
         | }
        """.stripMargin
+    })
+  }
+
+}
+
+object Json {
+
+  val structTypeCache = collection.mutable.Map[String, StructType]() // [json, type]
+
+  def getStructType(json: String): StructType = {
+    structTypeCache.getOrElseUpdate(json, {
+      println(">>>>> get StructType from json:")
+      println(json)
+      DataType.fromJson(json).asInstanceOf[StructType]
     })
   }
 

@@ -36,10 +36,10 @@ class JsonTest extends JUnitSuite {
     sql("select x, x.a from df").printSchema
     sql("select json(x), json(x.a) from df").show(5, false)
     sql("select json(x), json(x.a) from df").printSchema
-    //    val df2 = sqlContext.read.parquet("file:///D:/tmp/logaa.parquet")
-    //    df2.registerTempTable("df2")
-    //    sql("select mAppProfile from df2").show(5, false)
-    //    sql("select json(mAppProfile) from df2").show(5, false)
+    val df2 = sqlContext.read.parquet("file:///D:/tmp/logaa.parquet")
+    df2.registerTempTable("df2")
+    sql("select mAppProfile from df2").show(5, false)
+    sql("select json(mAppProfile) from df2").show(5, false)
   }
-  
+
 }
