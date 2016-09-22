@@ -14,7 +14,6 @@ import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.ToolProvider;
 
-@SuppressWarnings("restriction")
 public class JavacTest {
 
   public static void main(String[] args) throws Exception {
