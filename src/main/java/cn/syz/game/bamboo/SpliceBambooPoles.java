@@ -32,7 +32,7 @@ public class SpliceBambooPoles {
     int player = monitor.nextPlayer();
     while (monitor.getAliveCount() > 1) {
       SplicableQueue<Card> hand = hands.get(player);
-      // System.out.print("player" + player + ": ");
+      System.out.print("player" + player + ": ");
       if (discard(hand, hand.poll(), pile)) { // 出牌
         // 如果赢下此轮（即桌面牌堆中发现相同点数手牌），则本人继续出牌
       } else {
@@ -72,7 +72,7 @@ public class SpliceBambooPoles {
   }
 
   private boolean discard(SplicableQueue<Card> hand, Card discard, SplicableQueue<Card> pile) {
-    // System.out.println(pile.toString() + " <- " + discard + " ramain: " + hand.size());
+    System.out.println(pile.toString() + " <- " + discard + " ramain: " + hand.size());
     Node<Card> node = pile.findAndCutBefore(discard);
     if (node == null) {
       pile.add(discard);
@@ -89,6 +89,10 @@ public class SpliceBambooPoles {
       arr[pos1] = arr[pos2];
       arr[pos2] = tmp;
     }
+  }
+
+  public static void main(String[] args) {
+    System.out.println("Winner: player" + new SpliceBambooPoles().play(2));
   }
 
 }
