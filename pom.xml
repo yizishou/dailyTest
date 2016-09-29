@@ -19,7 +19,7 @@
   </properties>
 
   <modules>
-    <module>spark</module>
+    <module>spark-test</module>
   </modules>
 
   <dependencies>

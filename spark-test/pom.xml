@@ -9,8 +9,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>spark</artifactId>
-  <name>spark</name>
+  <artifactId>spark-test</artifactId>
+  <name>spark-test</name>
   <url>http://maven.apache.org</url>
 
   <dependencies>
