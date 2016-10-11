@@ -1,5 +1,7 @@
 package cn.syz.sorting;
 
+import static org.apache.commons.lang3.StringUtils.join;
+
 /**
  * 计数排序
  * 
@@ -37,10 +39,10 @@ public class CountingSort {
     int[] src = {11, 13, 17, 11, 18, 13, 17, 11, 15, 15, 14};
     int[] agent = {1, 3, 7, 1, 8, 3, 7, 1, 5, 5, 4};
     int max = 9;
-    System.out.println(org.apache.commons.lang3.StringUtils.join(agent, ','));
-    System.out.println(org.apache.commons.lang3.StringUtils.join(sort(agent, max), ','));
-    System.out.println(org.apache.commons.lang3.StringUtils.join(src, ','));
-    System.out.println(org.apache.commons.lang3.StringUtils.join(sort(src, agent, max), ','));
+    System.out.println(join(agent, ','));
+    System.out.println(join(sort(agent, max), ','));
+    System.out.println(join(src, ','));
+    System.out.println(join(sort(src, agent, max), ','));
   }
 
 }

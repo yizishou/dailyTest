@@ -50,19 +50,15 @@ public class RadixSort {
     boolean overflow = true;
     int shift = ArithmeticUtils.isPowerOfTwo(radix) ? MathUtils.log2(radix) : 0;
     for (int i = 0; i < src.length; i++) {
-      int truncToDigit = src[i];
-      if (shift > 0) {
-        if (currentDigit > 1) {
-          truncToDigit = truncToDigit >> (shift * (currentDigit - 1));
-        }
-        agent[i] = truncToDigit & ~(~0 << shift);
+      int trunc;
+      if (shift > 0) { // 基数为二的幂，可位移
+        trunc = src[i] >> (shift * (currentDigit - 1));
+        agent[i] = trunc & ~(~0 << shift);
       } else {
-        if (currentDigit > 1) {
-          truncToDigit = truncToDigit / ArithmeticUtils.pow(radix, currentDigit - 1);
-        }
-        agent[i] = truncToDigit % radix;
+        trunc = src[i] / ArithmeticUtils.pow(radix, currentDigit - 1);
+        agent[i] = trunc % radix;
       }
-      if (truncToDigit > 0) {
+      if (trunc > 0) {
         overflow = false;
       }
     }
