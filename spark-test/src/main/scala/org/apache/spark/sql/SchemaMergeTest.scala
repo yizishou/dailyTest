@@ -6,6 +6,7 @@ import org.apache.spark.sql.types.DataType
 import org.apache.spark.sql.types.StructType
 import org.apache.commons.io.IOUtils
 import java.io._
+import java.nio.charset.Charset
 
 class SchemaMergeTest extends JUnitSuite {
 
@@ -25,7 +26,7 @@ class SchemaMergeTest extends JUnitSuite {
     var is: InputStream = null
     try {
       is = Thread.currentThread.getContextClassLoader.getResourceAsStream(fileName)
-      IOUtils.readLines(is).toArray(Array.empty[String])
+      IOUtils.readLines(is, Charset.forName("UTF-8")).toArray(Array.empty[String])
     } finally {
       IOUtils.closeQuietly(is)
     }
