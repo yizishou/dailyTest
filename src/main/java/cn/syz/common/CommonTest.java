@@ -49,7 +49,15 @@ public class CommonTest {
     }
   }
 
-  @Test
-  public void f() {}
+//  @Test
+//  public void f() {
+//    foo(new java.util.HashMap(), new java.util.TreeMap());
+//  }
+//  
+//  private <T> void foo(T... ts) {
+//    for (T t : ts) {
+//      System.out.println(t.getClass());
+//    }
+//  }
 
 }
