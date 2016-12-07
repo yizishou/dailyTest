@@ -1,23 +1,15 @@
 package cn.syz.common;
 
 public class JavapTest {
-
+  
   private int i;
-
   private int j = 3;
 
-  public JavapTest() {
-    i = 2;
-  }
+  public JavapTest() { i = 2; }
 
-  private int iadd(int n) {
-    i += n;
-    return i;
-  }
+  private int iadd(int n) { i += n; return i; }
 
-  private int jreduce() {
-    return --j;
-  }
+  private int jreduce() { return --j; }
 
   public static void main(String[] args) {
     JavapTest test = new JavapTest();
