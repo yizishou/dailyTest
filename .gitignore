@@ -13,3 +13,6 @@ target/
 .settings/
 
 .cache-*
+
+hotspot_pid*.log
+
