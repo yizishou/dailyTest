@@ -15,7 +15,7 @@ import org.apache.commons.imaging.formats.png.PngConstants;
 import org.apache.commons.imaging.formats.png.PngText;
 import org.apache.commons.io.FileUtils;
 
-public class PngExif {
+public class PngComments {
 
   public static void main(String[] args) throws Exception {
     // test();
