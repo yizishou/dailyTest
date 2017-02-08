@@ -15,9 +15,6 @@ public class JavapTest {
     JavapTest test = new JavapTest();
     System.out.println(test.iadd(1 << 10));
     System.out.println(test.jreduce());
-    int a = 1;
-    int i = a * 12 + a + 2 * a;
-    System.out.println(i);
   }
 
 }
