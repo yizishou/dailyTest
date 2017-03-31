@@ -19,6 +19,7 @@
   </properties>
 
   <modules>
+    <module>java-test</module>
     <module>spark-test</module>
   </modules>
 
