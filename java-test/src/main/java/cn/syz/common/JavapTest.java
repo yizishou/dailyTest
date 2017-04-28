@@ -13,7 +13,7 @@ public class JavapTest {
 
   public static void main(String[] args) {
     JavapTest test = new JavapTest();
-    System.out.println(test.iadd(1 << 10));
+    System.out.println(test.iadd(new Integer(1 << 10)));
     System.out.println(test.jreduce());
   }
 
