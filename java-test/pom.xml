@@ -14,4 +14,18 @@
       <version>2.2.1</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>${java_source_version}</source>
+          <target>${java_target_version}</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
