@@ -8,43 +8,45 @@ import java.lang.ref.WeakReference;
 public class PhantomReferenceTest {
 
   public static void main(String[] args) throws Exception {
-    final ReferenceQueue<Test> queue = new ReferenceQueue<>();
+    ReferenceQueue<Test> queue = new ReferenceQueue<>();
+    Thread moniterThread = new Thread(() -> {
+      // 监视线程，随时检查引用队列，一旦发现引用就会打印出来
+      for (;;) {
+        Reference<? extends Test> ref = queue.poll();
+        if (ref != null) {
+          System.out.printf("%s加入引用队列%n", ref.getClass().getSimpleName());
+        }
+        try {
+          Thread.sleep(0);
+        } catch (InterruptedException e) {
+          break;
+        }
+      }
+    });
+    moniterThread.start();
     Test test = new Test();
     WeakReference<Test> weakReference = new WeakReference<Test>(test, queue);
     PhantomReference<Test> phantomReference = new PhantomReference<Test>(test, queue);
-    System.out.println("weakReference enqueued: " + weakReference.isEnqueued());
-    System.out.println("phantomReference enqueued: " + phantomReference.isEnqueued());
+    // 去除强引用
     test = null;
-    System.out.println("gc");
-    // 第一次gc，执行了finalize()方法，加入了弱引用队列，但是没有被垃圾回收，也没有进入虚引用队列
+    // 第一次gc，执行finalize()方法，弱引用进入队列。对象虽然不可达，但是还在堆中，虚引用也没有进入队列
+    System.out.println(">> 第一次gc <<");
     System.gc();
-    Thread.sleep(500);
-    System.out.println("weakReference enqueued: " + weakReference.isEnqueued());
-    System.out.println("phantomReference enqueued: " + phantomReference.isEnqueued());
-    Reference<? extends Test> ref = queue.poll();
-    System.out.println("reference: " + ref);
-    ref = queue.poll();
-    System.out.println("reference: " + ref);
-    System.out.println("gc");
+    Thread.sleep(100); // 这里等待一段时间，保证引用进入队列，和finalize()方法执行
     // 第二次gc，被垃圾回收，然后进入虚引用队列
+    System.out.println("\n>> 第二次gc <<");
     System.gc();
-    Thread.sleep(500);
-    System.out.println("weakReference enqueued: " + weakReference.isEnqueued());
-    System.out.println("phantomReference enqueued: " + phantomReference.isEnqueued());
-    ref = queue.poll();
-    System.out.println("reference: " + ref);
-    ref = queue.poll();
-    System.out.println("reference: " + ref);
+    assert weakReference != null && phantomReference != null;
+    moniterThread.interrupt();
   }
 
   public static class Test {
-    
+
     @Override
     protected void finalize() throws Throwable {
-      super.finalize();
-      System.out.println("Test.finalize()");
+      System.out.println("== finalize() ==");
     }
-    
+
   }
 
 }
